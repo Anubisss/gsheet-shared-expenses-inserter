@@ -114,6 +114,16 @@ const App = () => {
           </div>
         )}
       </div>
+      <footer className="mx-auto mt-8 mb-5 text-center text-sm">
+        <a
+          href="https://github.com/Anubisss/gsheet-shared-expenses-inserter"
+          className="text-gray-500 hover:underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          gsheet-shared-expenses-inserter
+        </a>
+      </footer>
     </div>
   );
 };
