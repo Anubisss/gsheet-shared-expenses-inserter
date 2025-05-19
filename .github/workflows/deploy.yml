@@ -1,0 +1,59 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      TF_VAR_bucket_name: ${{ vars.BUCKET_NAME }}
+      VITE_CLIENT_ID: ${{ secrets.VITE_CLIENT_ID }}
+      VITE_SPREADSHEET_ID: ${{ vars.VITE_SPREADSHEET_ID }}
+      VITE_SHEET_ID: ${{ vars.VITE_SHEET_ID }}
+      VITE_EXPENSES_TABLE_RANGE: ${{ vars.VITE_EXPENSES_TABLE_RANGE }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --force
+
+      - name: Run check-all
+        run: npm run check-all
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Terraform init
+        working-directory: ./terraform
+        run: terraform init
+
+      - name: Terraform plan
+        working-directory: ./terraform
+        run: terraform plan -out=tfplan
+
+      - name: Terraform apply
+        working-directory: ./terraform
+        run: terraform apply -auto-approve tfplan
+
+      - name: Build and deploy app to S3 bucket
+        run: ./deploy.sh
+        env:
+          BUCKET_NAME: ${{ vars.BUCKET_NAME }}

@@ -31,14 +31,15 @@ npm run dev
 ```
 npm ci
 
+npm run check-all
+
 cd terraform
 terraform init
 terraform plan -out tfplan
 terraform apply tfplan
 cd ..
 
-export BUCKET_NAME=
-./deploy.sh
+BUCKET_NAME=your-bucket-name ./deploy.sh
 ```
 
 ### License

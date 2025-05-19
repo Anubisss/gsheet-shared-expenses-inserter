@@ -13,7 +13,8 @@ CHECKMARK='✔'
 RESET='\033[0m'
 
 echo -e "${YELLOW}[1/3] Building...${RESET}"
-npm run check-all
+rm -rf dist
+npm run build
 echo -e "${GREEN}[1/3] Building DONE ${CHECKMARK} ${RESET}\n"
 
 echo -e "${YELLOW}[2/3] Removing all files from the S3 bucket...${RESET}"
