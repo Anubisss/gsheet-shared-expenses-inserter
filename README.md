@@ -29,7 +29,7 @@ npm run dev
 ### Deploy
 
 ```
-npm i
+npm ci
 
 cd terraform
 terraform init
