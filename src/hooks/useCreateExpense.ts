@@ -26,7 +26,7 @@ const useCreateExpense = (
 
     try {
       const res = await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`,,
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`,
         {
           method: 'POST',
           headers: {
