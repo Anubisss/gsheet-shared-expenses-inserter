@@ -11,13 +11,23 @@ import { lastExpensesCount, sharedExpensesTableColumnNames } from './lib/constan
 import getSpreadsheetUrl from './lib/getSpreadsheetUrl';
 import { Expense } from './lib/types';
 
+const getCurrentMonthTotalText = (total: number, currency: string): string => {
+  const currentDate = new Date();
+  const currentMonthNameLong = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(
+    currentDate,
+  );
+  return `${currentMonthNameLong} total: ${new Intl.NumberFormat().format(total)} ${currency}`;
+};
+
 const App = () => {
   const { accessToken, login, clearAccessToken } = useLogin();
   const {
     rows,
     categories,
     paidBys,
+    currency,
     sumRowIndex,
+    currentMonthTotal,
     isLoading,
     isReLoginNeeded,
     error,
@@ -88,6 +98,7 @@ const App = () => {
                     rows={rows}
                     lastExpensesCount={lastExpensesCount}
                     showSkeletonRows={isLoading}
+                    footerRowContent={getCurrentMonthTotalText(currentMonthTotal, currency)}
                   />
                 </div>
                 <div className="md:my-6 md:border-t md:border-cyan-500"></div>

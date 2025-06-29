@@ -8,8 +8,29 @@ interface SheetsResponse {
   values: string[][];
 }
 
+const regexTotalCurrency = / [^ ]*$/;
+
 const findSumRowIndex = (rows: string[][]): number => {
   return rows.findIndex((row) => row[0] === 'SUM');
+};
+
+const calculateYearMonthTotal = (rows: string[][], year: number, month: number): number => {
+  const currentMonthExpenses = rows.filter((r) => {
+    const rawDate = r[spreadsheetColumnIndexes.Date];
+    if (rawDate) {
+      const date = new Date(rawDate);
+      if (year === date.getFullYear() && month === date.getMonth()) {
+        return true;
+      }
+    }
+    return false;
+  });
+
+  const currentMonthTotals = currentMonthExpenses.map((e) => e[spreadsheetColumnIndexes.Total]);
+
+  const sum = currentMonthTotals.reduce((acc, current) => acc + +current.replace(/[^0-9]/g, ''), 0);
+
+  return sum;
 };
 
 const useGetExpenses = (
@@ -21,8 +42,11 @@ const useGetExpenses = (
   const [rows, setRows] = useState<ExpenseRow[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [paidBys, setPaidBys] = useState<PaidBy[]>([]);
+  const [currency, setCurrency] = useState<string>('');
 
   const [sumRowIndex, setSumRowIndex] = useState<number | null>(null);
+
+  const [currentMonthTotal, setCurrentMonthTotal] = useState<number>(0);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isReLoginNeeded, setIsReLoginNeeded] = useState(false);
@@ -81,6 +105,14 @@ const useGetExpenses = (
           paidBy: r[spreadsheetColumnIndexes.PaidBy],
         })),
       );
+
+      setCurrentMonthTotal(
+        calculateYearMonthTotal(
+          rowsBetweenHeaderAndSum,
+          new Date().getFullYear(),
+          new Date().getMonth(),
+        ),
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred.');
     } finally {
@@ -94,11 +126,22 @@ const useGetExpenses = (
     }
   }, [accessToken, loadExpenses]);
 
+  useEffect(() => {
+    if (rows.length) {
+      const match = rows[0].total.match(regexTotalCurrency);
+      if (match) {
+        setCurrency(match[0].trim());
+      }
+    }
+  }, [rows]);
+
   return {
     rows,
     categories,
     paidBys,
+    currency,
     sumRowIndex,
+    currentMonthTotal,
     isLoading,
     isReLoginNeeded,
     error,

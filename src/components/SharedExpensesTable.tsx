@@ -4,10 +4,12 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { sharedExpensesTableColumnNames } from '@/lib/constants';
 import { ExpenseRow } from '@/lib/types';
 import { Skeleton } from './ui/skeleton';
 
@@ -16,6 +18,7 @@ interface Props {
   rows: ExpenseRow[];
   lastExpensesCount: number;
   showSkeletonRows: boolean;
+  footerRowContent: string;
 }
 
 const SharedExpensesTable: FC<Props> = ({
@@ -23,6 +26,7 @@ const SharedExpensesTable: FC<Props> = ({
   rows,
   lastExpensesCount,
   showSkeletonRows,
+  footerRowContent,
 }) => {
   return (
     <div className="md:p-4">
@@ -59,6 +63,13 @@ const SharedExpensesTable: FC<Props> = ({
               </TableRow>
             ))}
         </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TableCell colSpan={sharedExpensesTableColumnNames.length}>
+              {footerRowContent}
+            </TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
     </div>
   );
