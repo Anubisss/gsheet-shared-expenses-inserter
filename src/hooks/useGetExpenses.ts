@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { spreadsheetColumnIndexes } from '@/lib/constants';
 import countOccurrences from '@/lib/countOccurrences';
 import { Category, ExpenseRow, PaidBy } from '@/lib/types';
 
@@ -51,25 +52,33 @@ const useGetExpenses = (
       const rowsBetweenHeaderAndSum = data.values.slice(1, sri);
 
       setCategories(
-        Array.from(countOccurrences(rowsBetweenHeaderAndSum, 1), ([name, count]) => ({
-          name,
-          count,
-        })),
+        Array.from(
+          countOccurrences(rowsBetweenHeaderAndSum, spreadsheetColumnIndexes.Category),
+          ([name, count]) => ({
+            name,
+            count,
+          }),
+        ),
       );
       setPaidBys(
-        Array.from(countOccurrences(rowsBetweenHeaderAndSum, 3), ([name, count]) => ({
-          name,
-          count,
-        })),
+        Array.from(
+          countOccurrences(rowsBetweenHeaderAndSum, spreadsheetColumnIndexes.PaidBy),
+          ([name, count]) => ({
+            name,
+            count,
+          }),
+        ),
       );
 
       setRows(
         data.values.slice(Math.max(0, sri - rowsLimit - 1), sri - 1).map((r, i) => ({
           rowIndex: sri - rowsLimit + i,
-          date: r[0] ? new Date(r[0]) : null,
-          category: r[1],
-          total: r[2],
-          paidBy: r[3],
+          date: r[spreadsheetColumnIndexes.Date]
+            ? new Date(r[spreadsheetColumnIndexes.Date])
+            : null,
+          category: r[spreadsheetColumnIndexes.Category],
+          total: r[spreadsheetColumnIndexes.Total],
+          paidBy: r[spreadsheetColumnIndexes.PaidBy],
         })),
       );
     } catch (err) {
