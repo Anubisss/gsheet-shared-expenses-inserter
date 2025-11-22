@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { spreadsheetColumnIndexes } from '@/lib/constants';
 import countOccurrences from '@/lib/countOccurrences';
-import { Category, ExpenseRow, PaidBy } from '@/lib/types';
+import { Category, ExpenseRow, PaidBy, PaidBysByCategory } from '@/lib/types';
 
 interface SheetsResponse {
   values: string[][];
@@ -33,6 +33,29 @@ const calculateYearMonthTotal = (rows: string[][], year: number, month: number):
   return sum;
 };
 
+const calculatePaidBysByCategory = (rows: string[][]): PaidBysByCategory => {
+  const pbbc: PaidBysByCategory = {};
+
+  rows.forEach((row) => {
+    const category = row[spreadsheetColumnIndexes.Category];
+    const paidBy = row[spreadsheetColumnIndexes.PaidBy];
+
+    if (category && paidBy) {
+      if (!pbbc[category]) {
+        pbbc[category] = [];
+      }
+      const pb = pbbc[category].find((pb) => pb.name === paidBy);
+      if (pb) {
+        pb.count++;
+      } else {
+        pbbc[category].push({ name: paidBy, count: 1 });
+      }
+    }
+  });
+
+  return pbbc;
+};
+
 const useGetExpenses = (
   accessToken: string | null,
   spreadsheetId: string,
@@ -42,6 +65,7 @@ const useGetExpenses = (
   const [rows, setRows] = useState<ExpenseRow[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [paidBys, setPaidBys] = useState<PaidBy[]>([]);
+  const [paidBysByCategory, setPaidBysByCategory] = useState<PaidBysByCategory>({});
   const [currency, setCurrency] = useState<string>('');
 
   const [sumRowIndex, setSumRowIndex] = useState<number | null>(null);
@@ -93,6 +117,8 @@ const useGetExpenses = (
           }),
         ),
       );
+
+      setPaidBysByCategory(calculatePaidBysByCategory(rowsBetweenHeaderAndSum));
 
       setRows(
         data.values.slice(Math.max(0, sri - rowsLimit - 1), sri - 1).map((r, i) => ({
@@ -146,6 +172,7 @@ const useGetExpenses = (
     isReLoginNeeded,
     error,
     refetch: loadExpenses,
+    paidBysByCategory,
   };
 };
 

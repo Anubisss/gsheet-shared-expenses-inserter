@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Expense } from '@/lib/types';
+import { Expense, PaidBysByCategory } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
@@ -45,6 +45,7 @@ const formSchema = z.object({
 interface Props {
   categoryOptions: string[];
   paidByOptions: string[];
+  paidBysByCategory: PaidBysByCategory;
   onAddExpense: (values: Expense) => void;
   isDisabled: boolean;
   showLoadingIndicator: boolean;
@@ -54,6 +55,7 @@ interface Props {
 const AddExpense: FC<Props> = ({
   categoryOptions,
   paidByOptions,
+  paidBysByCategory,
   onAddExpense,
   isDisabled,
   showLoadingIndicator,
@@ -68,6 +70,17 @@ const AddExpense: FC<Props> = ({
       paidBy: '',
     },
   });
+
+  const watchCategory = form.watch('category');
+
+  useEffect(() => {
+    if (watchCategory && paidBysByCategory[watchCategory]) {
+      const mostFrequentPaidBy = paidBysByCategory[watchCategory].sort(
+        (a, b) => b.count - a.count,
+      )[0];
+      form.setValue('paidBy', mostFrequentPaidBy.name, { shouldValidate: true });
+    }
+  }, [watchCategory, paidBysByCategory, form]);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     onAddExpense(values);

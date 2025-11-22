@@ -18,3 +18,7 @@ export interface PaidBy {
   name: string;
   count: number;
 }
+
+export interface PaidBysByCategory {
+  [categoryName: string]: PaidBy[];
+}

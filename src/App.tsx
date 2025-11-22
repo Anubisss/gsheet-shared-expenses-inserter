@@ -32,6 +32,7 @@ const App = () => {
     isReLoginNeeded,
     error,
     refetch: refetchExpenses,
+    paidBysByCategory,
   } = useGetExpenses(accessToken, SPREADSHEET_ID, EXPENSES_TABLE_RANGE, lastExpensesCount);
 
   const {
@@ -105,6 +106,7 @@ const App = () => {
                 <AddExpense
                   categoryOptions={sortedCategoryNames}
                   paidByOptions={sortedPaidBys}
+                  paidBysByCategory={paidBysByCategory}
                   onAddExpense={handleAddExpense}
                   isDisabled={isLoading}
                   showLoadingIndicator={isCreating}
